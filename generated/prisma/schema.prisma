@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Token {
+  id           String   @id @default(uuid())
+  userId       String?
+  accessToken  String
+  refreshToken String
+  expiryDate   BigInt
+  historyId    String?
+  createdAt    DateTime @default(now())
+
+  // Performance Indexes
+  @@index([userId], name: "idx_token_user_id") // Find tokens by user
+  @@index([expiryDate], name: "idx_token_expiry") // Token refresh operations
+  @@index([createdAt], name: "idx_token_created") // Chronological queries
+  @@index([userId, expiryDate], name: "idx_token_user_expiry") // User-specific token refresh
+}
+
+model Email {
+  id          String       @id @default(uuid())
+  messageId   String       @unique
+  userId      String?
+  subject     String
+  bodyHtml    String?
+  bodyText    String?
+  sender      String
+  recipients  String
+  cc          String?
+  bcc         String?
+  date        DateTime
+  threadId    String
+  createdAt   DateTime     @default(now())
+  attachments Attachment[]
+
+  // Performance Indexes
+  @@index([userId], name: "idx_email_user_id") // User-specific email queries
+  @@index([date], name: "idx_email_date") // Chronological ordering (API pagination)
+  @@index([createdAt], name: "idx_email_created") // Recent activity queries
+  @@index([sender], name: "idx_email_sender") // Filter/search by sender
+  @@index([threadId], name: "idx_email_thread") // Thread grouping
+  @@index([userId, date], name: "idx_email_user_date") // User emails by date (most common)
+  @@index([userId, createdAt], name: "idx_email_user_created") // User recent emails
+  @@index([date, userId], name: "idx_email_date_user") // Global date ordering with user filter
+  @@index([subject], name: "idx_email_subject") // Subject-based searches
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  emailId   String
+  fileName  String
+  mimeType  String
+  driveLink String
+  createdAt DateTime @default(now())
+
+  email Email @relation(fields: [emailId], references: [id], onDelete: Cascade)
+
+  // Performance Indexes  
+  @@index([emailId], name: "idx_attachment_email_id") // Join with emails (most common)
+  @@index([fileName], name: "idx_attachment_filename") // Search by filename
+  @@index([mimeType], name: "idx_attachment_mimetype") // Filter by file type
+  @@index([createdAt], name: "idx_attachment_created") // Recent attachments
+  @@index([emailId, createdAt], name: "idx_attachment_email_created") // Email attachments by date
+  @@index([mimeType, createdAt], name: "idx_attachment_type_created") // File type reports
+}

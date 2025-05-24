@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Token {
+  id            String   @id @default(uuid())
+  userId        String?
+  accessToken   String
+  refreshToken  String
+  expiryDate    BigInt
+  historyId     String?
+  createdAt     DateTime @default(now())
+}
+
+model Email {
+  id          String   @id @default(uuid())
+  messageId   String   @unique
+  userId      String?
+  subject     String
+  bodyHtml    String?
+  bodyText    String?
+  sender      String
+  recipients  String
+  cc          String?
+  bcc         String?
+  date        DateTime
+  threadId    String
+  createdAt   DateTime @default(now())
+  attachments Attachment[]
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  emailId   String
+  fileName  String
+  mimeType  String
+  driveLink String
+  createdAt DateTime @default(now())
+
+  email Email @relation(fields: [emailId], references: [id], onDelete: Cascade)
+}
