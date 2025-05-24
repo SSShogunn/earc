@@ -1,4 +1,3 @@
-
 # 📧 Email Archiving with OAuth Integration
 
 A comprehensive NestJS application that automatically archives Gmail emails to PostgreSQL database with Google Drive attachment storage using OAuth 2.0 authentication.
@@ -9,6 +8,14 @@ This system provides automated email archiving for G-Suite inboxes, capturing al
 
 ### 🏆 Assessment Task
 **Email Archiving with OAuth Integration** - Automatically store incoming emails from G-Suite inbox to database with OAuth integration, complete metadata capture, and attachment handling via Google Drive.
+
+## 🏗️ System Architecture
+
+The following diagram illustrates the complete email archiving workflow and system architecture:
+
+![Email Archiving Flow Diagram](flow-diagram.png)
+
+*This comprehensive flow diagram shows the entire email archiving process from user authentication through OAuth, email fetching from Gmail API, attachment processing with Google Drive, database storage, and API endpoints for accessing archived data.*
 
 ## ✨ Features
 
